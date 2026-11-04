@@ -1,34 +1,19 @@
 "use client";
 
 import RequireAuth from "@/components/RequireAuth";
-import { useAuth } from "@/components/AuthProvider";
-import { supabase } from "@/lib/supabase";
-
-function Home() {
-  const auth = useAuth();
-  const email = auth.status === "signed-in" ? auth.session.user.email : null;
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
-      <h1 className="text-3xl font-bold">שלום!</h1>
-      <p className="text-eggshell/70" dir="ltr">
-        {email}
-      </p>
-      <button
-        type="button"
-        onClick={() => supabase.auth.signOut()}
-        className="h-11 rounded-full border border-eggshell/30 px-6 transition hover:bg-eggshell/10"
-      >
-        התנתקות
-      </button>
-    </main>
-  );
-}
+import PanelShell from "@/components/PanelShell";
+import PanelHeader from "@/components/PanelHeader";
 
 export default function HomePage() {
   return (
     <RequireAuth>
-      <Home />
+      <PanelShell>
+        <PanelHeader />
+        <section className="glass mt-8 rounded-3xl p-8 motion-safe:animate-rise">
+          <h2 className="text-lg font-bold">מסך הבית</h2>
+          <p className="mt-2 text-eggshell/70">כאן ייבנו הכרטיסים: עכשיו, היום, משימות, יומן ו-EAGLE.</p>
+        </section>
+      </PanelShell>
     </RequireAuth>
   );
 }
