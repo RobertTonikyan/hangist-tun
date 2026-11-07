@@ -76,3 +76,24 @@ export type EagleTrade = {
   reason: string | null;
   mode: string | null;
 };
+
+// מה שהשרת של הפאנל מחזיר מ-Alpaca. כל הסכומים בדולרים.
+export type AlpacaPosition = {
+  symbol: string;
+  qty: number;
+  avgEntry: number;
+  current: number;
+  marketValue: number;
+  unrealizedPl: number;
+  unrealizedPlPct: number;
+};
+
+export type AlpacaSummary = {
+  paper: boolean;
+  equity: number;
+  lastEquity: number;
+  cash: number;
+  buyingPower: number;
+  positions: AlpacaPosition[];
+  history: { date: string; equity: number }[];
+};
