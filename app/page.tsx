@@ -7,6 +7,7 @@ import NextCard from "@/components/home/NextCard";
 import TodayCard from "@/components/home/TodayCard";
 import TasksCard from "@/components/home/TasksCard";
 import JournalCard from "@/components/home/JournalCard";
+import EagleCard from "@/components/home/EagleCard";
 import { useHomeData } from "@/components/home/useHomeData";
 import { useClock } from "@/components/useClock";
 
@@ -47,6 +48,9 @@ function Home() {
       </div>
       <div className="col-span-12 md:col-span-6 lg:col-span-4">
         <TasksCard tasks={tasks} today={clock.today} onChanged={refresh} />
+      </div>
+      <div className="col-span-12 md:col-span-6 lg:col-span-4">
+        <EagleCard />
       </div>
     </div>
   );
