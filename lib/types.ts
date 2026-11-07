@@ -48,3 +48,31 @@ export type JournalSecret = {
   snacks: string;
   note: string;
 };
+
+
+// שורה מהיומן של בוט החדשות: ידיעה אחת, הציון שלה, ומה הבוט עשה איתה
+export type EagleScore = {
+  id: number;
+  ts: string;
+  source: string | null;
+  headline: string | null;
+  url: string | null;
+  symbol: string | null;
+  score: number | null;
+  reason: string | null;
+  action: string | null;
+  mode: string | null;
+};
+
+// פעולה מול הברוקר: קנייה, מילוי, יציאה, ביטול...
+export type EagleTrade = {
+  id: number;
+  ts: string;
+  symbol: string;
+  side: string;
+  qty: number | null;
+  price: number | null;
+  stopPrice: number | null;
+  reason: string | null;
+  mode: string | null;
+};
