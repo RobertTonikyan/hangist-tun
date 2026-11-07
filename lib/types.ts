@@ -22,14 +22,26 @@ export type Task = {
   promisedTo: string | null;
 };
 
-// רשומת יומן ליום אחד. שדה שלא מולא הוא null או מחרוזת ריקה.
+// טקסט מוצפן: התוכן, ה-IV, ומפתח ה-AES עטוף במפתח הציבורי. הכל ב-base64.
+export type Sealed = {
+  ciphertext: string;
+  iv: string;
+  wrappedKey: string;
+};
+
+// רשומת יומן ליום אחד. המספרים גלויים (בשביל גרפים ורצף), הטקסט מוצפן ב-sealed.
 export type JournalEntry = {
   date: string;
   mood: number | null;
-  moodWord: string;
   sleptAt: string | null;
   wokeAt: string | null;
   sleepQuality: number | null;
+  sealed: Sealed | null;
+};
+
+// מה שמוצפן. נראה רק אחרי פתיחה בסיסמה.
+export type JournalSecret = {
+  moodWord: string;
   breakfast: string;
   lunch: string;
   dinner: string;
