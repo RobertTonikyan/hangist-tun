@@ -6,12 +6,18 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/components/AuthProvider";
 import SeasonEffect from "@/components/SeasonEffect";
 
-type Status = "idle" | "sending" | "sent" | "error";
+type Step = "email" | "code";
+
+// Supabase לא מאפשר לבקש קוד חדש לפני שעבר הזמן הזה
+const RESEND_SECONDS = 60;
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<Status>("idle");
+  const [code, setCode] = useState("");
+  const [step, setStep] = useState<Step>("email");
+  const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [resendIn, setResendIn] = useState(0);
   const auth = useAuth();
   const router = useRouter();
 
@@ -20,22 +26,61 @@ export default function LoginPage() {
     if (auth.status === "signed-in") router.replace("/");
   }, [auth.status, router]);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setStatus("sending");
+  // ספירה לאחור, שנייה אחרי שנייה, עד שאפשר לשלוח קוד חדש
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const id = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(id);
+  }, [resendIn]);
 
+  async function sendCode() {
+    setBusy(true);
+    setMessage("");
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      options: { shouldCreateUser: false, emailRedirectTo: window.location.origin },
     });
+    setBusy(false);
 
     if (error) {
+      // "For security purposes, you can only request this after 29 seconds"
+      // זו לא שגיאה אמיתית: קוד כבר נשלח לא מזמן. עוברים לספירה לאחור.
+      const wait = error.message.match(/after (\d+) seconds/);
+      if (wait) {
+        setResendIn(Number(wait[1]));
+        setStep("code");
+        return;
+      }
       setMessage(error.message);
-      setStatus("error");
-    } else {
-      setStatus("sent");
+      return;
     }
+
+    setCode("");
+    setStep("code");
+    setResendIn(RESEND_SECONDS);
   }
+
+  async function handleEmail(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await sendCode();
+  }
+
+  async function handleCode(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setMessage("");
+    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+    setBusy(false);
+
+    // אם הקוד נכון, AuthProvider מזהה את החיבור, וה-useEffect למעלה מעביר לבית.
+    if (error) setMessage(error.message);
+  }
+
+  const input =
+    "w-full rounded-xl border border-eggshell/15 bg-ink/50 px-4 placeholder:text-eggshell/40 outline-none transition focus:border-eggshell/60 focus:ring-4 focus:ring-eggshell/10";
+  const primary =
+    "mt-2 h-12 rounded-full bg-eggshell font-semibold text-ink transition hover:bg-white active:scale-[0.98] disabled:opacity-60";
+  const link = "text-eggshell/70 underline-offset-4 hover:text-eggshell hover:underline disabled:opacity-50 disabled:no-underline";
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-ink" dir="ltr">
@@ -52,26 +97,60 @@ export default function LoginPage() {
         </header>
 
         <section className="glass mx-auto w-full max-w-md rounded-3xl p-10 motion-safe:animate-rise motion-safe:[animation-delay:150ms]">
-          {status === "sent" ? (
-            <div className="text-center motion-safe:animate-rise">
-              <div className="relative mx-auto flex size-14 items-center justify-center rounded-full bg-eggshell/10">
+          {step === "code" ? (
+            <div className="motion-safe:animate-rise">
+              <div className="relative flex size-14 items-center justify-center rounded-full bg-eggshell/10">
                 <span className="absolute inset-0 rounded-full bg-eggshell/20 motion-safe:animate-ping" />
                 <svg className="relative" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <rect x="3" y="5" width="18" height="14" rx="2" />
                   <path d="m3 7 9 6 9-6" />
                 </svg>
               </div>
-              <h1 className="mt-6 text-2xl font-bold">Check your inbox</h1>
+              <h1 className="mt-6 text-3xl font-bold tracking-tight">Enter your code</h1>
               <p className="mt-2 text-eggshell/70">
-                We sent a sign-in link to <span className="font-semibold text-eggshell">{email}</span>
+                We sent a code to <span className="font-semibold text-eggshell">{email}</span>
               </p>
-              <button
-                type="button"
-                onClick={() => setStatus("idle")}
-                className="mt-8 text-sm text-eggshell/70 underline-offset-4 hover:text-eggshell hover:underline"
-              >
-                Use a different email
-              </button>
+
+              <form onSubmit={handleCode} className="mt-8 flex flex-col gap-4">
+                <label htmlFor="code" className="text-sm font-medium text-eggshell/80">
+                  Code
+                </label>
+                <input
+                  id="code"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  required
+                  minLength={6}
+                  maxLength={8}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                  className={`${input} h-14 text-center text-2xl font-bold tracking-[0.5em]`}
+                />
+                <button type="submit" disabled={busy || code.length < 6} className={primary}>
+                  {busy ? "Checking..." : "Sign in"}
+                </button>
+                {message && (
+                  <p role="alert" className="text-sm text-rust-light">
+                    {message}
+                  </p>
+                )}
+              </form>
+
+              <div className="mt-6 flex justify-between text-sm">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep("email");
+                    setMessage("");
+                  }}
+                  className={link}
+                >
+                  Use a different email
+                </button>
+                <button type="button" onClick={sendCode} disabled={busy || resendIn > 0} className={`${link} tabular-nums`}>
+                  {resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}
+                </button>
+              </div>
             </div>
           ) : (
             <>
@@ -79,11 +158,11 @@ export default function LoginPage() {
                 Welcome home
               </h1>
               <p className="mt-2 text-eggshell/70 motion-safe:animate-rise motion-safe:[animation-delay:400ms]">
-                Sign in with a link sent to your email. No password needed.
+                We&apos;ll email you a sign-in code. No password needed.
               </p>
 
               <form
-                onSubmit={handleSubmit}
+                onSubmit={handleEmail}
                 className="mt-8 flex flex-col gap-4 motion-safe:animate-rise motion-safe:[animation-delay:500ms]"
               >
                 <label htmlFor="email" className="text-sm font-medium text-eggshell/80">
@@ -97,16 +176,12 @@ export default function LoginPage() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-12 w-full rounded-xl border border-eggshell/15 bg-ink/50 px-4 placeholder:text-eggshell/40 outline-none transition focus:border-eggshell/60 focus:ring-4 focus:ring-eggshell/10"
+                  className={`${input} h-12`}
                 />
-                <button
-                  type="submit"
-                  disabled={status === "sending"}
-                  className="mt-2 h-12 rounded-full bg-eggshell font-semibold text-ink transition hover:bg-white active:scale-[0.98] disabled:opacity-60"
-                >
-                  {status === "sending" ? "Sending..." : "Send magic link"}
+                <button type="submit" disabled={busy} className={primary}>
+                  {busy ? "Sending..." : "Send code"}
                 </button>
-                {status === "error" && (
+                {message && (
                   <p role="alert" className="text-sm text-rust-light">
                     {message}
                   </p>

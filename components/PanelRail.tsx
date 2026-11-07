@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
+import Avatar from "./Avatar";
 
 function Icon({ children }: { children: ReactNode }) {
   return (
@@ -58,8 +59,13 @@ export default function PanelRail() {
       aria-label="ניווט ראשי"
       className="glass fixed bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full p-2 md:top-1/2 md:right-6 md:bottom-auto md:left-auto md:translate-x-0 md:-translate-y-1/2 md:flex-col md:px-3 md:py-4"
     >
-      <Link href="/" aria-label="Hangist Tun" className="hidden h-10 w-12 items-center justify-center text-sm font-bold tracking-wider md:flex">
-        HT
+      <Link
+        href="/settings"
+        aria-label="פרופיל והגדרות"
+        aria-current={pathname === "/settings" ? "page" : undefined}
+        className="hidden rounded-full transition hover:opacity-80 md:mb-1 md:flex"
+      >
+        <Avatar />
       </Link>
 
       {items.map((item) => {
