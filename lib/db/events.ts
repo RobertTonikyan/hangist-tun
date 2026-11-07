@@ -16,16 +16,8 @@ type EventRow = {
 
 const hhmm = (time: string) => time.slice(0, 5);
 
-export async function loadEventsForDay(date: string): Promise<DayEvent[]> {
-  const { data, error } = await supabase
-    .from("events")
-    .select("id, title, date, start_time, end_time, location, travel_minutes, status, progress")
-    .eq("date", date)
-    .order("start_time");
-
-  if (error) throw new Error(error.message);
-
-  return (data as EventRow[]).map((row) => ({
+function toEvent(row: EventRow): DayEvent {
+  return {
     id: row.id,
     title: row.title,
     date: row.date,
@@ -35,5 +27,25 @@ export async function loadEventsForDay(date: string): Promise<DayEvent[]> {
     travelMinutes: row.travel_minutes ?? 0,
     status: row.status,
     progress: row.progress ?? "idle",
-  }));
+  };
+}
+
+const COLUMNS = "id, title, date, start_time, end_time, location, travel_minutes, status, progress";
+
+export async function loadEventsForDay(date: string): Promise<DayEvent[]> {
+  return loadEventsInRange(date, date);
+}
+
+// כל האירועים מ-from עד to (כולל), לפי תאריך ושעה
+export async function loadEventsInRange(from: string, to: string): Promise<DayEvent[]> {
+  const { data, error } = await supabase
+    .from("events")
+    .select(COLUMNS)
+    .gte("date", from)
+    .lte("date", to)
+    .order("date")
+    .order("start_time");
+
+  if (error) throw new Error(error.message);
+  return (data as EventRow[]).map(toEvent);
 }

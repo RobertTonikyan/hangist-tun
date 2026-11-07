@@ -105,3 +105,13 @@ export type Exam = {
   type: "exam" | "assignment";
   date: string;
 };
+
+// זמן למידה שתוכנן ב-Rega לקראת מבחן
+export type StudySession = {
+  id: string;
+  date: string;
+  start: string;
+  end: string;
+  status: "suggested" | "approved" | "done";
+  course: string;
+};
