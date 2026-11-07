@@ -1,11 +1,33 @@
 const weekdays = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+const shortWeekdays = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
 const months = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+const DAY = 24 * 60 * 60 * 1000;
+
+function parse(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return { year, month, day, time: Date.UTC(year, month - 1, day) };
+}
 
 // "2026-11-04" → "יום רביעי, 4 בנובמבר"
 export function longDate(value: string) {
-  const [year, month, day] = value.split("-").map(Number);
-  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
-  return `יום ${weekdays[weekday]}, ${day} ב${months[month - 1]}`;
+  const { month, day, time } = parse(value);
+  return `יום ${weekdays[new Date(time).getUTCDay()]}, ${day} ב${months[month - 1]}`;
+}
+
+// כמה ימים מ-from עד to. שלילי אם to כבר עבר.
+export function daysBetween(from: string, to: string) {
+  return Math.round((parse(to).time - parse(from).time) / DAY);
+}
+
+// "היום", "מחר", "מחרתיים", "ה׳ 12.11", או "עבר המועד"
+export function dayLabel(value: string, today: string) {
+  const offset = daysBetween(today, value);
+  if (offset < 0) return "עבר המועד";
+  if (offset === 0) return "היום";
+  if (offset === 1) return "מחר";
+  if (offset === 2) return "מחרתיים";
+  const { month, day, time } = parse(value);
+  return `${shortWeekdays[new Date(time).getUTCDay()]} ${day}.${month}`;
 }
 
 // 990 → "16:30"

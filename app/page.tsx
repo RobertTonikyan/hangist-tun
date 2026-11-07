@@ -5,12 +5,13 @@ import PanelShell from "@/components/PanelShell";
 import PanelHeader from "@/components/PanelHeader";
 import NextCard from "@/components/home/NextCard";
 import TodayCard from "@/components/home/TodayCard";
+import TasksCard from "@/components/home/TasksCard";
 import { useHomeData } from "@/components/home/useHomeData";
 import { useClock } from "@/components/useClock";
 
 function Home() {
   const clock = useClock();
-  const { state, retry } = useHomeData(clock?.today);
+  const { state, retry, refresh } = useHomeData(clock?.today);
 
   if (!clock || state.status === "loading") {
     return <p className="mt-8 text-eggshell/60 motion-safe:animate-pulse">טוען...</p>;
@@ -39,6 +40,9 @@ function Home() {
       </div>
       <div className="col-span-12 lg:col-span-4">
         <TodayCard events={events} tasks={tasks} today={clock.today} minutes={clock.minutes} />
+      </div>
+      <div className="col-span-12 md:col-span-6 lg:col-span-4">
+        <TasksCard tasks={tasks} today={clock.today} onChanged={refresh} />
       </div>
     </div>
   );

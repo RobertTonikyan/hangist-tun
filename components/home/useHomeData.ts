@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { loadEventsForDay } from "@/lib/db/events";
 import { loadOpenTasks } from "@/lib/db/tasks";
 import type { DayEvent, Task } from "@/lib/types";
@@ -12,6 +12,11 @@ type State =
   | { status: "error"; message: string }
   | { status: "ready"; data: HomeData };
 
+async function loadAll(today: string): Promise<HomeData> {
+  const [events, tasks] = await Promise.all([loadEventsForDay(today), loadOpenTasks()]);
+  return { events, tasks };
+}
+
 // טוען את כל מה שמסך הבית צריך, בבת אחת.
 export function useHomeData(today: string | undefined) {
   const [state, setState] = useState<State>({ status: "loading" });
@@ -21,9 +26,9 @@ export function useHomeData(today: string | undefined) {
     if (!today) return;
     let cancelled = false;
 
-    Promise.all([loadEventsForDay(today), loadOpenTasks()])
-      .then(([events, tasks]) => {
-        if (!cancelled) setState({ status: "ready", data: { events, tasks } });
+    loadAll(today)
+      .then((data) => {
+        if (!cancelled) setState({ status: "ready", data });
       })
       .catch((error) => {
         if (!cancelled) setState({ status: "error", message: error instanceof Error ? error.message : String(error) });
@@ -39,5 +44,12 @@ export function useHomeData(today: string | undefined) {
     setAttempt((n) => n + 1);
   }
 
-  return { state, retry };
+  // אחרי שמירה: טוענים מחדש בשקט. אם נכשל, השגיאה עוברת למי שקרא לפונקציה.
+  const refresh = useCallback(async () => {
+    if (!today) return;
+    const data = await loadAll(today);
+    setState({ status: "ready", data });
+  }, [today]);
+
+  return { state, retry, refresh };
 }

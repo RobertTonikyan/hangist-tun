@@ -31,3 +31,8 @@ export async function loadOpenTasks(): Promise<Task[]> {
     promisedTo: row.promised_to,
   }));
 }
+
+export async function setTaskDone(id: string, done: boolean) {
+  const { error } = await supabase.from("tasks").update({ done }).eq("id", id);
+  if (error) throw new Error(error.message);
+}
