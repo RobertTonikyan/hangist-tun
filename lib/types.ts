@@ -21,3 +21,18 @@ export type Task = {
   isPromise: boolean;
   promisedTo: string | null;
 };
+
+// רשומת יומן ליום אחד. שדה שלא מולא הוא null או מחרוזת ריקה.
+export type JournalEntry = {
+  date: string;
+  mood: number | null;
+  moodWord: string;
+  sleptAt: string | null;
+  wokeAt: string | null;
+  sleepQuality: number | null;
+  breakfast: string;
+  lunch: string;
+  dinner: string;
+  snacks: string;
+  note: string;
+};
