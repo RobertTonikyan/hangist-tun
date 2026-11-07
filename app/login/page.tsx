@@ -51,6 +51,10 @@ export default function LoginPage() {
         setStep("code");
         return;
       }
+      if (error.message.includes("Signups not allowed")) {
+        setMessage("This email isn't registered. Check for typos.");
+        return;
+      }
       setMessage(error.message);
       return;
     }
@@ -173,9 +177,13 @@ export default function LoginPage() {
                   type="email"
                   required
                   autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  inputMode="email"
                   placeholder="you@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value.trim())}
                   className={`${input} h-12`}
                 />
                 <button type="submit" disabled={busy} className={primary}>
