@@ -9,9 +9,7 @@ import { useRegaWeek } from "@/components/rega/useRegaWeek";
 import { useClock } from "@/components/useClock";
 import { addDays } from "@/lib/dates";
 import { weekDays, weekRange, weekStart } from "@/lib/week";
-
-// הכתובת של אפליקציית Rega. אחרי ההעלאה לאוויר נחליף לכתובת האמיתית.
-const REGA_URL = "http://localhost:3000";
+import { REGA_URL } from "@/lib/rega";
 
 const navButton = "flex size-11 items-center justify-center rounded-full border border-eggshell/30 text-xl transition hover:bg-eggshell/10";
 
@@ -39,14 +37,16 @@ function Week() {
             חזרה להשבוע
           </button>
         )}
-        <a
-          href={`${REGA_URL}/add`}
-          target="_blank"
-          rel="noreferrer"
-          className="ms-auto inline-flex h-11 items-center rounded-full bg-eggshell px-5 font-semibold text-ink transition hover:bg-white"
-        >
-          להוסיף ב-Rega
-        </a>
+        {REGA_URL && (
+          <a
+            href={`${REGA_URL}/add`}
+            target="_blank"
+            rel="noreferrer"
+            className="ms-auto inline-flex h-11 items-center rounded-full bg-eggshell px-5 font-semibold text-ink transition hover:bg-white"
+          >
+            להוסיף ב-Rega
+          </a>
+        )}
       </div>
 
       {state.status === "loading" && <p className="mt-6 text-eggshell/60 motion-safe:animate-pulse">טוען את השבוע...</p>}

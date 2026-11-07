@@ -4,10 +4,10 @@ import { leaveAt, nextEvent } from "@/lib/next-event";
 import { formatTime } from "@/lib/dates";
 import { toMinutes } from "@/lib/time";
 import type { DayEvent } from "@/lib/types";
+import { REGA_URL } from "@/lib/rega";
 
 // ברירת המחדל של Rega. בהמשך נקרא את זה מטבלת ההגדרות.
 const PREP_MINUTES = 10;
-const REGA_URL = "http://localhost:3000";
 
 export default function NextCard({ events, minutes }: { events: DayEvent[]; minutes: number }) {
   const next = nextEvent(events, minutes);
@@ -17,12 +17,14 @@ export default function NextCard({ events, minutes }: { events: DayEvent[]; minu
       <Card title="הדבר הבא">
         <p className="text-xl font-bold">אין עוד אירועים היום</p>
         <p className="mt-1 text-eggshell/70">מכאן והלאה היום פנוי.</p>
-        <a
-          href={`${REGA_URL}/add`}
-          className="mt-5 inline-flex h-11 items-center rounded-full bg-eggshell px-5 font-semibold text-ink transition hover:bg-white"
-        >
-          להוסיף אירוע ב-Rega
-        </a>
+        {REGA_URL && (
+          <a
+            href={`${REGA_URL}/add`}
+            className="mt-5 inline-flex h-11 items-center rounded-full bg-eggshell px-5 font-semibold text-ink transition hover:bg-white"
+          >
+            להוסיף אירוע ב-Rega
+          </a>
+        )}
       </Card>
     );
   }
