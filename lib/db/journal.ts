@@ -57,6 +57,13 @@ export async function saveEntry(entry: JournalEntry) {
   if (error) throw new Error(error.message);
 }
 
+// התאריכים שבהם מילאת את היומן, מתאריך מסוים ועד היום. בלי שום טקסט, רק תאריכים.
+export async function loadJournalDates(from: string): Promise<string[]> {
+  const { data, error } = await supabase.from("journal_entries").select("date").gte("date", from).order("date");
+  if (error) throw new Error(error.message);
+  return (data as { date: string }[]).map((row) => row.date);
+}
+
 type KeyRow = { public_key: string; encrypted_private_key: string; salt: string; iv: string };
 
 // המפתחות של היומן, או null אם עוד לא בחרת סיסמה

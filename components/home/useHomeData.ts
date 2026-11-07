@@ -3,18 +3,27 @@
 import { useCallback, useEffect, useState } from "react";
 import { loadEventsForDay } from "@/lib/db/events";
 import { loadOpenTasks } from "@/lib/db/tasks";
+import { loadJournalDates } from "@/lib/db/journal";
+import { addDays } from "@/lib/dates";
 import type { DayEvent, Task } from "@/lib/types";
 
-export type HomeData = { events: DayEvent[]; tasks: Task[] };
+export type HomeData = { events: DayEvent[]; tasks: Task[]; journalDates: string[] };
 
 type State =
   | { status: "loading" }
   | { status: "error"; message: string }
   | { status: "ready"; data: HomeData };
 
+// כמה ימים אחורה טוענים מהיומן, בשביל הרצף
+const JOURNAL_DAYS_BACK = 90;
+
 async function loadAll(today: string): Promise<HomeData> {
-  const [events, tasks] = await Promise.all([loadEventsForDay(today), loadOpenTasks()]);
-  return { events, tasks };
+  const [events, tasks, journalDates] = await Promise.all([
+    loadEventsForDay(today),
+    loadOpenTasks(),
+    loadJournalDates(addDays(today, -JOURNAL_DAYS_BACK)),
+  ]);
+  return { events, tasks, journalDates };
 }
 
 // טוען את כל מה שמסך הבית צריך, בבת אחת.

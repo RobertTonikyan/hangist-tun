@@ -43,3 +43,13 @@ export function greeting(minutes: number) {
   if (minutes < 17 * 60) return "אחר הצהריים טובים";
   return "ערב טוב";
 }
+
+// "2026-11-07" + 1 → "2026-11-08"
+export function addDays(value: string, days: number) {
+  return new Date(parse(value).time + days * DAY).toISOString().slice(0, 10);
+}
+
+// "2026-11-07" → "ש׳"
+export function weekdayLetter(value: string) {
+  return shortWeekdays[new Date(parse(value).time).getUTCDay()];
+}

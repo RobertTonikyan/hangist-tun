@@ -6,6 +6,7 @@ import PanelHeader from "@/components/PanelHeader";
 import NextCard from "@/components/home/NextCard";
 import TodayCard from "@/components/home/TodayCard";
 import TasksCard from "@/components/home/TasksCard";
+import JournalCard from "@/components/home/JournalCard";
 import { useHomeData } from "@/components/home/useHomeData";
 import { useClock } from "@/components/useClock";
 
@@ -31,15 +32,18 @@ function Home() {
     );
   }
 
-  const { events, tasks } = state.data;
+  const { events, tasks, journalDates } = state.data;
 
   return (
     <div className="mt-8 grid grid-cols-12 gap-5">
       <div className="col-span-12 lg:col-span-5">
         <NextCard events={events} minutes={clock.minutes} />
       </div>
-      <div className="col-span-12 lg:col-span-4">
+      <div className="col-span-12 md:col-span-6 lg:col-span-4">
         <TodayCard events={events} tasks={tasks} today={clock.today} minutes={clock.minutes} />
+      </div>
+      <div className="col-span-12 md:col-span-6 lg:col-span-3">
+        <JournalCard journalDates={journalDates} today={clock.today} />
       </div>
       <div className="col-span-12 md:col-span-6 lg:col-span-4">
         <TasksCard tasks={tasks} today={clock.today} onChanged={refresh} />
