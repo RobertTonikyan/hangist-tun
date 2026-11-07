@@ -8,6 +8,7 @@ import TodayCard from "@/components/home/TodayCard";
 import TasksCard from "@/components/home/TasksCard";
 import JournalCard from "@/components/home/JournalCard";
 import EagleCard from "@/components/home/EagleCard";
+import WeekCard from "@/components/home/WeekCard";
 import { useHomeData } from "@/components/home/useHomeData";
 import { useClock } from "@/components/useClock";
 
@@ -51,6 +52,9 @@ function Home() {
       </div>
       <div className="col-span-12 md:col-span-6 lg:col-span-4">
         <EagleCard />
+      </div>
+      <div className="col-span-12 md:col-span-6 lg:col-span-4">
+        <WeekCard tasks={tasks} today={clock.today} />
       </div>
     </div>
   );

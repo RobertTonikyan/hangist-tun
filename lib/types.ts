@@ -97,3 +97,11 @@ export type AlpacaSummary = {
   positions: AlpacaPosition[];
   history: { date: string; equity: number }[];
 };
+
+// מבחן או הגשה מ-Rega
+export type Exam = {
+  id: string;
+  course: string;
+  type: "exam" | "assignment";
+  date: string;
+};
