@@ -1,6 +1,6 @@
 "use client";
 
-import { useClock } from "@/lib/useClock";
+import { useClock } from "@/components/useClock";
 import { formatTime, greeting, longDate } from "@/lib/dates";
 
 export default function PanelHeader({ title }: { title?: string }) {

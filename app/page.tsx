@@ -3,16 +3,18 @@
 import RequireAuth from "@/components/RequireAuth";
 import PanelShell from "@/components/PanelShell";
 import PanelHeader from "@/components/PanelHeader";
+import NextCard from "@/components/home/NextCard";
 
 export default function HomePage() {
   return (
     <RequireAuth>
       <PanelShell>
         <PanelHeader />
-        <section className="glass mt-8 rounded-3xl p-8 motion-safe:animate-rise">
-          <h2 className="text-lg font-bold">מסך הבית</h2>
-          <p className="mt-2 text-eggshell/70">כאן ייבנו הכרטיסים: עכשיו, היום, משימות, יומן ו-EAGLE.</p>
-        </section>
+        <div className="mt-8 grid grid-cols-12 gap-5">
+          <div className="col-span-12 lg:col-span-5">
+            <NextCard />
+          </div>
+        </div>
       </PanelShell>
     </RequireAuth>
   );
